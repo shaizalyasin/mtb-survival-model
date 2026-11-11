@@ -2,7 +2,7 @@
 PY := .venv/bin/python
 PIP := .venv/bin/pip
 
-.PHONY: setup download verify-data features train test demo serve figures artifact-size clean
+.PHONY: setup download verify-data features train ablation test demo serve figures artifact-size clean
 
 setup:
 	python3 -m venv .venv
@@ -21,6 +21,10 @@ features: download
 
 train: download
 	PYTHONPATH=src $(PY) src/train.py
+
+# All four arms, including the metastasis-count probe that is never served.
+ablation: download
+	PYTHONPATH=src $(PY) src/ablation.py
 
 test:
 	$(PY) -m pytest tests/ -q

@@ -1,0 +1,183 @@
+{
+  "seed": 20261111,
+  "arms": [
+    {
+      "arm": "clinical",
+      "label": "Clinical only (age, sex, cancer type, sample type)",
+      "n_features": 57,
+      "boosting_rounds": 263,
+      "c_index_out_of_fold": 0.67,
+      "c_index": 0.6733,
+      "n_test": 4913,
+      "events_test": 2018,
+      "time_dependent_auc": {
+        "per_horizon": {
+          "12_months": 0.6958,
+          "24_months": 0.7144,
+          "60_months": 0.7218
+        },
+        "mean": 0.7103
+      },
+      "integrated_brier_score": 0.1933,
+      "grid_months": [
+        1.4,
+        76.6
+      ],
+      "note": "lower is better; 0.25 is the value of always predicting 50%"
+    },
+    {
+      "arm": "genomic",
+      "label": "Genomic only (mutations, CNA, TMB, MSI, FGA)",
+      "n_features": 695,
+      "boosting_rounds": 253,
+      "c_index_out_of_fold": 0.6604,
+      "c_index": 0.6755,
+      "n_test": 4913,
+      "events_test": 2018,
+      "time_dependent_auc": {
+        "per_horizon": {
+          "12_months": 0.7027,
+          "24_months": 0.7055,
+          "60_months": 0.5829
+        },
+        "mean": 0.6593
+      },
+      "integrated_brier_score": 0.2184,
+      "grid_months": [
+        1.4,
+        76.6
+      ],
+      "note": "lower is better; 0.25 is the value of always predicting 50%"
+    },
+    {
+      "arm": "full",
+      "label": "Full model (served)",
+      "n_features": 752,
+      "boosting_rounds": 277,
+      "c_index_out_of_fold": 0.704,
+      "c_index": 0.7126,
+      "n_test": 4913,
+      "events_test": 2018,
+      "time_dependent_auc": {
+        "per_horizon": {
+          "12_months": 0.742,
+          "24_months": 0.7524,
+          "60_months": 0.687
+        },
+        "mean": 0.7244
+      },
+      "integrated_brier_score": 0.1985,
+      "grid_months": [
+        1.4,
+        76.6
+      ],
+      "note": "lower is better; 0.25 is the value of always predicting 50%"
+    },
+    {
+      "arm": "full_plus_mets",
+      "label": "Full + metastasis count (leakage probe, never served)",
+      "n_features": 753,
+      "boosting_rounds": 380,
+      "c_index_out_of_fold": 0.7251,
+      "c_index": 0.7379,
+      "n_test": 4913,
+      "events_test": 2018,
+      "time_dependent_auc": {
+        "per_horizon": {
+          "12_months": 0.7566,
+          "24_months": 0.7853,
+          "60_months": 0.7469
+        },
+        "mean": 0.7605
+      },
+      "integrated_brier_score": 0.1838,
+      "grid_months": [
+        1.4,
+        76.6
+      ],
+      "note": "lower is better; 0.25 is the value of always predicting 50%"
+    }
+  ],
+  "deltas": {
+    "genomics_on_top_of_clinical": 0.0393,
+    "clinical_on_top_of_genomic": 0.0371,
+    "metastasis_count_on_top_of_full": 0.0253
+  },
+  "c_index_per_cancer_type": [
+    {
+      "oncotree_code": "LUAD",
+      "n": 789,
+      "events": 339,
+      "c_index": 0.6906
+    },
+    {
+      "oncotree_code": "COAD",
+      "n": 445,
+      "events": 165,
+      "c_index": 0.6375
+    },
+    {
+      "oncotree_code": "IDC",
+      "n": 433,
+      "events": 157,
+      "c_index": 0.7473
+    },
+    {
+      "oncotree_code": "PRAD",
+      "n": 409,
+      "events": 114,
+      "c_index": 0.7651
+    },
+    {
+      "oncotree_code": "PAAD",
+      "n": 330,
+      "events": 223,
+      "c_index": 0.6088
+    },
+    {
+      "oncotree_code": "HGSOC",
+      "n": 190,
+      "events": 72,
+      "c_index": 0.5692
+    },
+    {
+      "oncotree_code": "BLCA",
+      "n": 181,
+      "events": 58,
+      "c_index": 0.6417
+    },
+    {
+      "oncotree_code": "UEC",
+      "n": 162,
+      "events": 25,
+      "c_index": 0.7088
+    },
+    {
+      "oncotree_code": "READ",
+      "n": 151,
+      "events": 49,
+      "c_index": 0.6534
+    },
+    {
+      "oncotree_code": "SKCM",
+      "n": 133,
+      "events": 41,
+      "c_index": 0.6237
+    },
+    {
+      "oncotree_code": "LUSC",
+      "n": 104,
+      "events": 57,
+      "c_index": 0.6866
+    }
+  ],
+  "published_reference": {
+    "source": "Mestrallet, Onco 2025, 10.3390/onco5010008",
+    "c_index": 0.76,
+    "cohort": "msk_met_2021 merged with msk_ch_2020, n=16,603",
+    "included_features_we_exclude": [
+      "treatment",
+      "metastasis count"
+    ]
+  }
+}

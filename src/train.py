@@ -66,7 +66,9 @@ def cox_label(months: np.ndarray, event: np.ndarray) -> np.ndarray:
     return signed
 
 
-def prepare(study_dir: Path, seed: int, test_size: float):
+def prepare(
+    study_dir: Path, seed: int, test_size: float, include_mets_probe: bool = False
+):
     started = time.time()
     cohort = load(study_dir)
     gene_panels = panel_module.load_panels(PANEL_NAMES)
@@ -107,7 +109,9 @@ def prepare(study_dir: Path, seed: int, test_size: float):
     train_rows = [row for row in rows if row.patient_id in train_ids]
     test_rows = [row for row in rows if row.patient_id in test_ids]
 
-    schema = feat.build_schema(train_rows, gene_panels)
+    schema = feat.build_schema(
+        train_rows, gene_panels, include_mets_probe=include_mets_probe
+    )
     print(
         f"schema {schema.version}: {len(schema.columns):,} columns "
         f"({len(schema.oncotree_codes)} oncotree, {len(schema.mutation_genes)} mutation, "

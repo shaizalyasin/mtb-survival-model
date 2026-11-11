@@ -66,10 +66,20 @@ class PatientFeatures:
     # attribute means something slightly different from the trained one.
     caveats: tuple[str, ...] = ()
 
+    # Leakage probe, used by one ablation arm and never served. This counts
+    # metastatic sites recorded over the patient's entire disease course, so
+    # relative to sequencing it is future information. It is populated only
+    # from the flat files; `from_api_payloads` leaves it None by construction,
+    # so a served schema physically cannot carry it.
+    met_site_count: float | None = None
+
 
 # --------------------------------------------------------------------------
 # Schema
 # --------------------------------------------------------------------------
+
+
+MET_PROBE_COLUMN = "met_site_count_LEAKAGE_PROBE"
 
 
 @dataclass
@@ -81,6 +91,10 @@ class FeatureSchema:
     del_genes: list[str]
     panels: dict[str, list[str]]
     columns: list[str]
+    # Only ever True for the ablation arm that measures how much the published
+    # result depends on a feature unavailable at sequencing time. A schema
+    # written with this set must not be served.
+    include_mets_probe: bool = False
 
     @property
     def numeric_columns(self) -> list[str]:
@@ -115,6 +129,7 @@ def _columns(
     mutation_genes: list[str],
     amp_genes: list[str],
     del_genes: list[str],
+    include_mets_probe: bool = False,
 ) -> list[str]:
     return (
         list(NUMERIC_COLUMNS)
@@ -122,6 +137,7 @@ def _columns(
         + [f"mut_{gene}" for gene in mutation_genes]
         + [f"amp_{gene}" for gene in amp_genes]
         + [f"del_{gene}" for gene in del_genes]
+        + ([MET_PROBE_COLUMN] if include_mets_probe else [])
     )
 
 
@@ -129,6 +145,7 @@ def build_schema(
     rows: list[PatientFeatures],
     panels: dict[str, list[str]],
     min_patients: int = MIN_PATIENTS_PER_FEATURE,
+    include_mets_probe: bool = False,
 ) -> FeatureSchema:
     """Derive the column set from the training rows only.
 
@@ -165,7 +182,10 @@ def build_schema(
         amp_genes=amp_genes,
         del_genes=del_genes,
         panels={name: sorted(genes) for name, genes in panels.items()},
-        columns=_columns(oncotree_codes, mutation_genes, amp_genes, del_genes),
+        columns=_columns(
+            oncotree_codes, mutation_genes, amp_genes, del_genes, include_mets_probe
+        ),
+        include_mets_probe=include_mets_probe,
     )
 
 
@@ -214,6 +234,13 @@ def build_row(patient: PatientFeatures, schema: FeatureSchema) -> np.ndarray:
         values.append(gene_value(gene, patient.amplified_genes))
     for gene in schema.del_genes:
         values.append(gene_value(gene, patient.deleted_genes))
+
+    if schema.include_mets_probe:
+        values.append(
+            float(patient.met_site_count)
+            if patient.met_site_count is not None
+            else np.nan
+        )
 
     row = np.asarray(values, dtype=np.float64)
     if row.shape[0] != len(schema.columns):
@@ -324,6 +351,7 @@ def from_flat_files(cohort, panels: dict[str, list[str]]) -> list[PatientFeature
                 mutated_genes=mutated.get(sample_id, frozenset()),
                 amplified_genes=amplified.get(sample_id, frozenset()),
                 deleted_genes=deleted.get(sample_id, frozenset()),
+                met_site_count=_optional_float(record.get("MET_SITE_COUNT")),
             )
         )
 

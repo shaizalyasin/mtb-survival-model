@@ -2733,5 +2733,6 @@
     "del_WHSC1L1",
     "del_ZFHX3",
     "del_ZRSR2"
-  ]
+  ],
+  "include_mets_probe": false
 }

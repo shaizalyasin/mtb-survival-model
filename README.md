@@ -26,10 +26,12 @@ fetched live from a portal, render the figure.
 | Features | 752 (8 clinical, 54 cancer type, 442 mutation, 174 amplification, 74 deletion) |
 | Test C-index | **0.7126** |
 | Out-of-fold C-index | 0.7040 |
-| Train C-index | 0.7336 |
+| Time-dependent AUC, 12 / 24 / 60 months | 0.742 / 0.752 / 0.687 |
+| Integrated Brier score | 0.1985 (0.25 = always predicting 50%) |
 
-Still to do: hyperparameter tuning, the four-arm ablation, the full metric
-suite (time-dependent AUC, integrated Brier score), and `report.md`.
+Full numbers, per-cancer-type breakdown and limitations are in
+[`report.md`](report.md). Still to do: hyperparameter tuning, then the portal
+tab.
 
 ## The number to compare against, and why ours is lower
 
@@ -47,17 +49,34 @@ That 0.76 is not our target, for two reasons that are both deliberate:
    timepoint it is future information, and a model using it looks excellent and
    predicts nothing you did not already know.
 
-So the gap between 0.71 and 0.76 is the point, not a shortfall. Quantifying it
-is what the planned ablation is for:
+So the gap between 0.71 and 0.76 is the point, not a shortfall. The ablation
+measures it:
 
-```
-1. clinical only (age, sex, cancer type, sample type)
-2. genomic only  (mutations, CNA, TMB, MSI, FGA)
-3. full model    (what we serve)
-4. full + MET_SITE_COUNT   <- never served, exists only to measure the gap
-```
+| arm | features | C-index |
+| --- | ---: | ---: |
+| Clinical only (age, sex, cancer type, sample type) | 57 | 0.6733 |
+| Genomic only (mutations, CNA, TMB, MSI, FGA) | 695 | 0.6755 |
+| **Full model (served)** | **752** | **0.7126** |
+| Full + metastasis count (never served) | 753 | 0.7379 |
 
-Arm 4 is not a model anyone should deploy. It is a measurement.
+Three things come out of that:
+
+- Genomics adds **+0.0393** over knowing age, sex, cancer type and sample type.
+  Modest, real, and the number to quote when asked whether the sequencing earns
+  its place.
+- Genomic alone (0.6755) is about as strong as clinical alone (0.6733). The
+  usual objection that a pan-cancer model only learns the diagnosis is half
+  true at most.
+- **One excluded column is worth two thirds of the entire gene panel.**
+  Metastasis count alone adds 0.0253 where 695 genomic features add 0.0393.
+  That single column is most of why the published number is higher, and it
+  cannot be known for a newly sequenced patient.
+
+Arm 4 is not a model anyone should deploy. It is a measurement, and the schema
+flag that enables it is never set on a served model.
+
+Within a single cancer type the picture is more sober: 0.57 for high-grade
+serous ovarian up to 0.77 for prostate. See [`report.md`](report.md).
 
 ## What the model is allowed to know
 
