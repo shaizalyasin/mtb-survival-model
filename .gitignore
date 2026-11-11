@@ -1,0 +1,8 @@
+# Downloaded study data. Public, but ODbL licensed and ~300 MB extracted.
+data/
+
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/

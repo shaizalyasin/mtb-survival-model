@@ -1,0 +1,33 @@
+{
+  "model_version": "1.0.0",
+  "schema_version": "1.0.0",
+  "trained_on": "msk_met_2021",
+  "data_licence": "ODC-ODbL-1.0",
+  "seed": 20261111,
+  "boosting_rounds": 277,
+  "params": {
+    "objective": "survival:cox",
+    "eval_metric": "cox-nloglik",
+    "max_depth": 4,
+    "learning_rate": 0.05,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 10,
+    "tree_method": "hist",
+    "nthread": 0
+  },
+  "n_train": 19648,
+  "n_test": 4913,
+  "n_features": 752,
+  "c_index_train": 0.7336264366473692,
+  "c_index_test": 0.7126456863925684,
+  "c_index_out_of_fold": 0.7039797918951712,
+  "os_anchor": "date of sequencing",
+  "excluded_by_design": [
+    "MET_COUNT",
+    "MET_SITE_COUNT",
+    "DMETS_DX_*",
+    "treatment",
+    "AGE_AT_EVIDENCE_OF_METS"
+  ]
+}
