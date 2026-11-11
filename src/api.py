@@ -19,11 +19,23 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from inference import MODEL_VERSION, RiskModel, predict_from_payloads
 
 ARTIFACTS = Path(os.environ.get("MTB_ARTIFACTS", "artifacts"))
+
+# The portal tab calls this service from the browser. Behind the auth proxy
+# both share an origin and no CORS is involved; in the plain demo stack the
+# service sits on its own port, so the portal's origin has to be allowed.
+# Listed explicitly rather than "*", because a wildcard here would let any page
+# the clinician visits post patient payloads to this service.
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("MTB_CORS_ORIGINS", "").split(",")
+    if origin.strip()
+]
 
 # Loaded once, at startup, never per request.
 _model: RiskModel | None = None
@@ -51,6 +63,17 @@ app = FastAPI(
     ),
     lifespan=lifespan,
 )
+
+if CORS_ORIGINS:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=CORS_ORIGINS,
+        allow_methods=["GET", "POST"],
+        allow_headers=["Content-Type"],
+        # No cookies are involved: the service has no session and no identity
+        # of its own, so credentialed requests would serve no purpose.
+        allow_credentials=False,
+    )
 
 
 class PredictRequest(BaseModel):
