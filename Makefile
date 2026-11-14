@@ -50,3 +50,7 @@ clean:
 	rm -f artifacts/model.json artifacts/feature_schema.json artifacts/model_card.json
 	rm -f artifacts/reference_cohort.parquet artifacts/baseline_hazard.parquet
 	rm -f figures/km_*.png
+
+# Random search, ranked on out-of-fold C-index over the training split only.
+tune: download
+	PYTHONPATH=src $(PY) src/tune.py --trials 120 --folds 5

@@ -154,6 +154,35 @@ when a served study lacks one is determined by XGBoost's default branch rather
 than by evidence. The response reports which features were absent so this is
 visible rather than silent.
 
+## Hyperparameter search, and why nothing changed
+
+120 random configurations plus the incumbent, each scored by 5-fold
+out-of-fold C-index on the training split alone. The test split was read once,
+at the end, for the defaults and the winner only.
+
+| | OOF C-index | depth | lr | subsample | colsample | min_child_weight |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| trial 82 (best) | 0.7062 +/- 0.0078 | 8 | 0.026 | 0.62 | 0.44 | 1 |
+| trial 9 | 0.7055 +/- 0.0097 | 6 | 0.027 | 0.83 | 0.68 | 5 |
+| trial 47 | 0.7054 +/- 0.0085 | 5 | 0.022 | 0.88 | 0.56 | 1 |
+| **defaults (shipped)** | **0.7039 +/- 0.0083** | 4 | 0.050 | 0.80 | 0.80 | 10 |
+
+Across all 121 trials: best 0.7062, median 0.7019, worst 0.6926. Nineteen beat
+the defaults.
+
+**The defaults were kept.** The winner's margin is +0.0022, which is smaller
+than the +/-0.0078 spread between its own folds, so the ranking is not stable
+enough to call it a better model. The test split agrees that nothing much is
+there: 0.7126 for the defaults against 0.7136 for the winner, a gain of
++0.0010 on 4,913 patients.
+
+This is worth stating plainly because it is the useful finding. The entire
+hyperparameter space is worth about a fifth of what adding genomic features to
+clinical ones was worth (+0.0393), and less than a tenth of what the single
+metastasis-count column was worth (+0.0253). On this cohort the model is
+limited by what it is allowed to know about the patient, not by how it is
+fitted. Tuning harder is not the lever.
+
 ## Limitations
 
 **Immortal time.** Patients had to survive long enough to be sequenced and
