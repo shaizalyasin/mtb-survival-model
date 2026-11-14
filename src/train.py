@@ -37,7 +37,19 @@ from load import load
 
 MODEL_VERSION = "1.0.0"
 
-PANEL_NAMES = ["IMPACT341", "IMPACT410", "IMPACT468"]
+# The first three are the only panels present in MSK-MET, so they are the only
+# ones that shape training. The last two are carried in the schema purely for
+# serving: msk_chord_2024, the study the demo portal hosts, also uses IMPACT505
+# and IMPACT-HEME-400. Without them a patient sequenced on either would have no
+# known panel, and every gene off that panel would be scored as "tested, not
+# mutated" instead of "never tested".
+PANEL_NAMES = [
+    "IMPACT341",
+    "IMPACT410",
+    "IMPACT468",
+    "IMPACT505",
+    "IMPACT-HEME-400",
+]
 
 DEFAULT_PARAMS = {
     "objective": "survival:cox",

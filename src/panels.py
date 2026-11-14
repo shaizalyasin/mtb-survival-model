@@ -6,6 +6,12 @@ MSK-MET mixes three IMPACT panel versions:
     IMPACT410    6,372 samples   24.7%    410 genes
     IMPACT341    1,801 samples    7.0%    341 genes
 
+Served studies can use others. msk_chord_2024 adds IMPACT505 (505 genes) and
+IMPACT-HEME-400 (400 genes), so those are fetched and stored in the schema too
+even though no training patient was sequenced on them. A panel the schema does
+not know means no gene can be marked untested, which quietly turns "never
+looked at" into "looked at and found nothing" for every gene off that panel.
+
 A gene that is not on the panel a given sample was sequenced with was never
 looked at. Coding it 0 would assert "no mutation found" for roughly a third of
 the cohort on genes nobody tested, so those cells become NaN instead and
