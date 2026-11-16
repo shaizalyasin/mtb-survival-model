@@ -97,6 +97,14 @@ found" asserts a negative result nobody measured. Those cells are NaN instead,
 which is 9.35% of all gene cells. Panel definitions are not in the study
 tarball and are fetched from the cBioPortal API, then cached.
 
+The shipped schema carries **five** panels rather than those three. Training
+only ever saw the three in MSK-MET, but a served study can use others, and
+`msk_chord_2024` adds IMPACT505 and IMPACT-HEME-400. A panel the schema does
+not recognise means no gene can be marked untested, which quietly turns "never
+looked at" back into "looked at and found nothing" for every gene off that
+panel. So those two are stored as well, even though no training patient was
+sequenced on them.
+
 **Attribute names differ between studies.** The flat file calls it `FGA` while
 the REST API calls it `FRACTION_GENOME_ALTERED`. The demo study uses `GENDER`
 and `CURRENT_AGE_DEID` where the training study uses `SEX` and
